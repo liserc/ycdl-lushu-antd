@@ -6,22 +6,16 @@
           <a-row :gutter="15">
             <a-col>
               <h1 style="font-size:20px">
-                <span class="liStyle">{{ data.name }}</span>
+                <span class="liStyle">{{ owner.name }}</span>
               </h1>
             </a-col>
           </a-row>
           <a-row>
             <a-col :span="4">
-              <span class="liStyle">里程 {{ data.mileage | fromM }}km</span>
+              <span class="liStyle">里程 {{ owner.mileage | fromM }}km</span>
             </a-col>
             <a-col :span="4">
-              <span class="liStyle">平均坡度 {{ routeData[1] }}%</span>
-            </a-col>
-            <a-col :span="4">
-              <span class="liStyle">累计爬升 {{ routeData[2] }}m</span>
-            </a-col>
-            <a-col :span="4">
-              <span class="liStyle">海拔落差 {{ data.drop }}m</span>
+              <span class="liStyle">海拔落差 {{ owner.drop }}m</span>
             </a-col>
             <a-col :span="4">
               &nbsp;
@@ -41,77 +35,75 @@
         </a-card>
       </a-col>
       <a-col :span="9">
-        <a-card
-          :bordered="false"
-          :body-style="{padding: '0'}">
-          <el-carousel
-            v-if="hasData"
-            ref="elCarousel"
-            trigger="click"
-            :interval="3000"
-            :height="elCarouselHeight + 'px'"
-            indicator-position="none"
-            @change="carouselChange"
+        <a-card :bordered="false" :body-style="{padding: '0px'}">
+          <div
+            class="demo-infinite-container"
           >
-            <el-carousel-item v-for="(item,index) in resolveKeywords" :key="index" style="overflow: auto">
-              <a-card :bordered="false">
-                <img
-                  v-if="item.type ===2"
-                  slot="cover"
-                  :src="item.name"
-                  height="200"
-                  alt="图片无法加载"
-                  :preview="2"
-                  :preview-text="item.explain"/>
-                <aplayer
-                  v-else-if="item.type ===3"
-                  :ref="index"
-                  :music="{
-                    title: 'secret base~君がくれたもの~',
-                    artist: 'Silent Siren',
-                    src: 'http://www.w3school.com.cn/i/song.ogg',
-                    pic: 'https://moeplayer.b0.upaiyun.com/aplayer/secretbase.jpg'
-                  }"
-                  mode="circulation"
-                />
-                <video-player
-                  v-else-if="item.type ===4"
-                  :ref="index"
-                  class="video-player vjs-custom-skin"
-                  :options="{
-                    height: '200%',
-                    muted: false,
-                    autoplay: false,
-                    language: 'en',
-                    playbackRates: [0.7, 1.0, 1.5, 2.0],
-                    sources: [{
-                      type: 'video/mp4',
-                      src: item.name
-                    }],
-                    poster: 'https://surmon-china.github.io/vue-quill-editor/static/images/surmon-1.jpg'
-                  }"
-                  :playsinline="true"
-                />
-                <div v-else-if="item.type ===5">
-                  <ellipsis :length="100">{{ item.name }}</ellipsis>
-                </div>
-                <!--<a-card-meta-->
-                <!--title="LISER">-->
-                <!--<a-avatar slot="avatar" src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />-->
-                <!--<template slot="description">-->
-                <!--<ellipsis :length="100">散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影。-->
-                <!--调皮的阳光掀动了四月的心帘，温暖如约的歌声渐起。</ellipsis>-->
-                <!--</template>-->
-                <!--</a-card-meta>-->
-                <div class="cardItemContent">
-                  <span>{{ item.time | fromNow }}</span>
-                  <div class="avatarList">
-                    <span>{{ item.city }} {{ item.district }} {{ item.street }}</span>
-                  </div>
-                </div>
-              </a-card>
-            </el-carousel-item>
-          </el-carousel>
+            <a-list
+              itemLayout="vertical"
+              size="small"
+              :dataSource="resolveKeywords"
+            >
+              <a-list-item slot="renderItem" slot-scope="item, index" :id="index">
+                <a-card
+                  :bordered="false"
+                  :head-style="{padding:'0px',border: '0px'}"
+                  @click="cardClick(index)"
+                >
+                  <template slot="title">
+                    <span>{{ item.street }}</span>
+                  </template>
+                  <template slot="extra">
+                    <span>{{ item.time | formatUptime }}</span>
+                  </template>
+                  <template slot="cover">
+                    <img
+                      v-if="item.type ===2"
+                      :src="item.name"
+                      alt="图片无法加载"
+                      height="200"
+                      :preview="2"
+                      :preview-text="item.explain"/>
+                    <aplayer
+                      v-if="item.type ===3"
+                      :ref="index"
+                      :music="{
+                        title: 'music',
+                        artist: '录音',
+                        src: 'http://www.w3school.com.cn/i/song.ogg',
+                        pic: 'https://moeplayer.b0.upaiyun.com/aplayer/secretbase.jpg'
+                      }"
+                      mode="circulation"
+                    />
+                    <video-player
+                      v-if="item.type ===4"
+                      :ref="index"
+                      class="vjs-custom-skin"
+                      :options="{
+                        height: '200',
+                        muted: false,
+                        autoplay: false,
+                        language: 'en',
+                        playbackRates: [0.7, 1.0, 1.5, 2.0],
+                        sources: [{
+                          type: 'video/mp4',
+                          src: item.name
+                        }]
+                      }"
+                      :playsinline="false"
+                    />
+                    <h3 v-if="item.type ===5" slot="title">{{ item.name }}</h3>
+                  </template>
+                  <a-card-meta
+                    description="散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影。调皮的阳光掀动了四月的心帘，温暖如约的歌声渐起。">
+                  </a-card-meta>
+                </a-card>
+                <template slot="actions">
+                  <span><a-icon type="environment"/>{{ item.city }} {{ item.district }} </span>
+                </template>
+              </a-list-item>
+            </a-list>
+          </div>
         </a-card>
       </a-col>
     </a-row>
@@ -120,8 +112,8 @@
       <a-col>
         <a-card :bordered="false" :body-style="{padding:'5px'}">
           <div>
-            <a-avatar :src="data.avatar" />
-            <span style="padding-left: 2px">{{ data.nickName }} 上传于：{{ '1560329422031' |formatUptime }}</span>
+            <a-avatar :src="owner.avatar"/>
+            <span style="padding-left: 2px">{{ owner.nickName }} 上传于：{{ '1560329422031' |formatUptime }}</span>
           </div>
         </a-card>
       </a-col>
@@ -129,7 +121,12 @@
     <br>
     <a-row>
       <a-col>
-        <social-commentary/>
+        <a-card>
+          <a-divider orientation="left">评论信息</a-divider>
+          <!--<social-commentary></social-commentary>-->
+          <social-comment :commentSubject="commentSubject" :comments="comments" @refreshComment="refreshComment"></social-comment>
+        </a-card>
+        <!--<social-commentary/>-->
       </a-col>
     </a-row>
   </div>
@@ -138,10 +135,12 @@
 import Vue from 'vue'
 import { loadBMap } from '@/assets/js/async-load-bmap.js'
 import { loadRoute } from '@/api/lushu/route/index.js'
+import { queryComment } from '@/api/lushu/common/index.js'
 import { wgs84_to_bd09 } from '@/assets/js/gps-transform.js'
 import { Button, Carousel, CarouselItem } from 'element-ui'
 import moment from 'moment'
-import SocialCommentary from '@/views/lushu/route/components/social-commentary.vue'
+import SocialCommentary from '@/components/Lushu/SocialCommentary'
+import SocialComment from '@/components/Lushu/SocialComment'
 import { Ellipsis } from '@/components'
 // 引入图片预览插件
 import preview from 'vue-photo-preview'
@@ -167,24 +166,14 @@ Vue.use(preview)
 Vue.use(VideoPlayer)
 // Vue.use(MuseUI)
 
-const listData = []
-for (let i = 0; i < 23; i++) {
-  listData.push({
-    href: 'https://vue.ant.design/',
-    title: `ant design vue part ${i}`,
-    avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
-    description: 'Ant Design, a design language for background applications, is refined by Ant UED Team.',
-    content: 'We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.'
-  })
-}
-
 export default {
   components: {
     ACol,
     ARow,
     Aplayer,
     SocialCommentary,
-    Ellipsis
+    Ellipsis,
+    SocialComment
   },
   filters: {
     fromM (data) {
@@ -205,31 +194,29 @@ export default {
   },
   data () {
     return {
-      data: null,
-      elCarouselHeight: 416,
-      muCardMediaWidth: '200px',
+      pathId: null,
+      owner: {
+        'routId': '',
+        'userId': '',
+        'nickName': '',
+        'avatar': '',
+        'name': '',
+        'type': undefined,
+        'record': undefined,
+        'snapshot': '',
+        'drop': null,
+        'mileage': undefined,
+        'use': '',
+        'start': '',
+        'end': '',
+        'uptime': null,
+        'praise': null,
+        'collection': null,
+        'comment': null,
+        'medias': null
+      },
       map: null,
       hasData: false,
-      // 音视频播放配置项
-      playerOptions: {
-        muted: false,
-        language: 'zh',
-        playbackRates: [0.7, 1.0, 1.5, 2.0],
-        sources: [],
-        poster: '/static/images/author.jpg'
-      },
-      // 音视频播放类型
-      playerSources: {
-        mp3: 'audio/mp3',
-        mp4: 'video/mp4'
-      },
-      roteName: '北京路口赛段',
-      routeData: ['7.4', '1.99', '366.9', '188.0'],
-      authorName: 'Wjh2016',
-      time: '2019-6-23',
-      number: '111111',
-      dialogStatus: undefined,
-      dialogVisible: false,
       resolveLocations: [],
       resolveKeywords: [],
       markers: [],
@@ -240,10 +227,7 @@ export default {
         3: require('@/assets/images/ic_route_voice.png'),
         4: require('@/assets/images/ic_route_video.png'),
         5: require('@/assets/images/ic_route_label.png')
-        // 'http://duanly.oss-cn-shenzhen.aliyuncs.com/bmap/ic_route_photo.png'
       },
-      images: [],
-      listData,
       pagination: {
         onChange: (page) => {
           console.log(page)
@@ -254,48 +238,56 @@ export default {
         { type: 'star-o', text: '156' },
         { type: 'like-o', text: '156' },
         { type: 'message', text: '2' }
-      ]
+      ],
+      commentSubject: {
+        routeId: '',
+        userId: '',
+        routeType: 1
+      },
+      comments: []
     }
   },
   created () {
-    // 加载百度地图
-    loadBMap('tSiFWPYXfG7iInGZhEfL8ThMMAisdyXQ').then(() => {
-      console.log('加载地图成功')
-      this.map = new BMap.Map('container')
-      const point = new BMap.Point(116.404, 39.915)
-      this.map.centerAndZoom(point, 15)
-      this.map.enableScrollWheelZoom() // 启用滚轮放大缩小，默认禁用
-      this.map.enableContinuousZoom() // 启用地图惯性拖拽，默认禁用
-      this.map.addControl(new BMap.NavigationControl())
-      this.map.addControl(new BMap.MapTypeControl())
-      // this.map.setMapStyleV2({
-      //   styleId: '2d8d9faa497c0f410abe41d80606d403'
-      // })
-    })
-
-    console.log('路由传值：' + this.$route.query)
-    this.data = this.$route.query
+    const pathId = this.$route.params.id
+    this.pathId = pathId
+    this.commentSubject.routeId = pathId
+    this.commentSubject.userId = this.$store.getters.userId
+    this.initBMap()
   },
   mounted () {
-    this.load(this.$route.params.id)
+    this.selectComments(this.pathId)
   },
   methods: {
-    load (id) {
+    initBMap () {
+      // 加载百度地图
+      loadBMap('tSiFWPYXfG7iInGZhEfL8ThMMAisdyXQ').then(() => {
+        console.log('加载地图成功')
+        this.map = new BMap.Map('container')
+        const point = new BMap.Point(116.404, 39.915)
+        this.map.centerAndZoom(point, 15)
+        this.map.enableScrollWheelZoom() // 启用滚轮放大缩小，默认禁用
+        this.map.enableContinuousZoom() // 启用地图惯性拖拽，默认禁用
+        this.map.addControl(new BMap.NavigationControl())
+        this.map.addControl(new BMap.MapTypeControl())
+
+        // 加载数据 绘制地图
+        this.selectRoute(this.pathId)
+      })
+    },
+    selectRoute (id) {
       loadRoute(id)
         .then(response => {
-          // var locations = response.data.data.locations
+          this.owner = response.data
           const { locations, keypoints } = response.data
           const rLocations = []
-          locations.forEach(function (val, index) {
+          locations.forEach(function (val) {
             const result = wgs84_to_bd09(val.lng, val.lat)
-            // eslint-disable-next-line no-undef
             const location = new BMap.Point(result[0], result[1])
             rLocations.push(location)
           })
           if (keypoints) {
-            keypoints.forEach((val, index) => {
+            keypoints.forEach((val) => {
               const result = wgs84_to_bd09(val.lng, val.lat)
-              // eslint-disable-next-line no-undef
               if (val.type > 1 && val.type < 6) {
                 val.lng = result[1]
                 val.lat = result[0]
@@ -318,19 +310,14 @@ export default {
     loadKeyPoints (points) {
       this.all_index = points.length
       points.forEach((val, index) => {
-        // eslint-disable-next-line no-undef
         var point = new BMap.Point(val.lat, val.lng)
-        // eslint-disable-next-line no-undef
         var myIcon = new BMap.Icon(
           this.route_photo[val.type],
-          // eslint-disable-next-line no-undef
           new BMap.Size(48, 48),
           {
-            // eslint-disable-next-line no-undef
             anchor: new BMap.Size(23, 48)
           }
         )
-        // eslint-disable-next-line no-undef
         this.markers[index] = new BMap.Marker(point, { icon: myIcon })
         this.map.centerAndZoom(point, 15)
         this.markers[index].customData = { index: index }
@@ -338,14 +325,14 @@ export default {
         const that = this
         this.markers[index].addEventListener('click', function () {
           that.markers[that.now_index].setAnimation(0)
-          console.log(this.customData.index)
+          that.scrollToListItem(this.customData.index)
+          // console.log(this.customData.index)
           that.showPoint(this.customData.index)
-          that.$refs.elCarousel.setActiveItem(this.customData.index)
+          // that.$refs.elCarousel.setActiveItem(this.customData.index)
         })
       })
     },
     loadPolyline (locations) {
-      // eslint-disable-next-line no-undef
       var polyline = new BMap.Polyline(locations, {
         strokeColor: '#00AA33', // 线路颜色
         strokeWeight: 4, // 线路大小
@@ -397,11 +384,27 @@ export default {
       const marker = new BMap.Marker(point, { icon: myIcon })
       this.map.addOverlay(marker)
     },
+    cardClick (index) {
+      this.markers[this.now_index].setAnimation(0)
+      this.showPoint(index)
+    },
     routeExport () {
-      alert('导出')
+      console.log('导出')
     },
     routeCollection () {
       alert('收藏')
+    },
+    selectComments (id) {
+      queryComment(id).then(response => {
+        const { data } = response
+        this.comments = data
+      })
+    },
+    refreshComment () {
+      this.selectComments(this.commentSubject.routeId)
+    },
+    scrollToListItem (id) {
+      document.getElementById(id).scrollIntoView()
     }
   }
 }
@@ -429,7 +432,7 @@ export default {
 
       > span {
         flex: 1 1;
-        color: rgba(0,0,0,.45);
+        color: rgba(0, 0, 0, .45);
         font-size: 12px;
       }
 
@@ -438,4 +441,19 @@ export default {
       }
     }
   }
+
+  .demo-infinite-container {
+    border-radius: 4px;
+    overflow-x: hidden;
+    padding: 8px 24px;
+    height: 420px;
+  }
+
+  .demo-loading-container {
+    position: absolute;
+    bottom: 40px;
+    width: 100%;
+    text-align: center;
+  }
+
 </style>
