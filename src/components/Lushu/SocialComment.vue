@@ -4,14 +4,14 @@
     <a-comment>
       <a-avatar
         slot="avatar"
-        src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-        alt="Han Solo"
+        :src="$store.getters.avatar"
+        :alt="$store.getters.nickname"
       />
       <div slot="content">
         <a-form-item>
           <a-textarea v-model="comment.content" placeholder="发表自己的看法" :rows="3"></a-textarea>
         </a-form-item>
-        <a-form-item>
+        <a-form-item v-show="comment.content">
           <a-button
             htmlType="submit"
             @click="commitComment"
@@ -58,9 +58,9 @@
             <span class="add-comment">添加新评论</span>
           </div>
           <transition name="fade">
-            <div v-if="showReply" class="input-wrapper">
+            <div v-if="showItemId === item.id" class="input-wrapper">
               <el-input
-                v-model="replyItem.content"
+                v-model="reply.content"
                 class="gray-bg-input"
                 type="textarea"
                 :rows="3"
@@ -82,7 +82,7 @@
 <script>
 import Vue from 'vue'
 import { Input, Button } from 'element-ui'
-import { postComment, postCommentReply } from '@/api/lushu/common/index.js'
+import { postComment, postCommentReply } from '@/api/lushu/common'
 Vue.use(Input)
 Vue.use(Button)
 export default {
@@ -99,32 +99,33 @@ export default {
   },
   data () {
     return {
-      inputTextarea: '',
-      showReply: false,
+      showItemId: '',
       comment: {
-        content: undefined,
-        routeId: undefined,
-        routeType: undefined,
-        userId: undefined
+        content: '',
+        routeId: '',
+        routeType: '',
+        userId: ''
       },
       reply: {
-        commentId: undefined,
-        reviewerId: 10,
-        respondentId: undefined,
-        content: undefined
+        commentId: '',
+        reviewerId: '',
+        respondentId: '',
+        content: ''
       }
     }
   },
   computed: {},
   created () {
     this.comment = this.commentSubject
+    const { userId } = this.commentSubject
+    this.reply.reviewerId = userId
   },
   methods: {
     /**
        * 点击取消按钮
        */
     cancel () {
-      this.showReply = false
+      this.showItemId = ''
     },
 
     /**
@@ -143,16 +144,20 @@ export default {
     },
 
     /**
-     * 提交回复
-     */
+       * 提交回复
+       */
     commitReply () {
+      const { content } = this.reply
+      if (content) {
+        this.reply.content = content.substring(content.indexOf('：') + 1, content.length)
+      }
       postCommentReply(this.reply).then(() => {
         this.$notification['success']({
           message: '提示',
           description: '回复成功',
           duration: 8
         })
-        this.reply.content = null
+        this.reply.content = ''
         this.cancel()
         this.$emit('refreshComment')
       })
@@ -167,12 +172,12 @@ export default {
       if (reply) {
         this.reply.content = '@' + reply.reviewerNickName + '：'
         this.reply.respondentId = reply.reviewerId
+        this.reply.commentId = item.id
       } else {
         this.reply.content = ''
         this.reply.respondentId = item.userId
       }
-      this.reply.commentId = item.id
-      this.showReply = true
+      this.showItemId = item.id
     }
   }
 }

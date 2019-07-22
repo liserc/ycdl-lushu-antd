@@ -18,10 +18,15 @@
           <span>
             <a-tag>{{ item.record | filterRecord }}</a-tag>
             <a-tag>{{ item.mileage | filterMileage }} km</a-tag>
-            <a-tag>{{ item.medias }} 标准点</a-tag>
+            <a-tag>{{ item.medias }} 标注点</a-tag>
           </span>
         </template>
       </a-list-item-meta>
+      <p>
+        <a-icon type="environment"/>
+        <span>{{ item.province }} </span>
+        <span>{{ item.city }}</span>
+      </p>
       <author-list-content :description="item.description" :owner="item.nickName" :avatar="item.avatar" :href="item.avatar" :updateAt="item.uptime"/>
       <img slot="extra" width="200" alt="logo" :src="item.snapshot"/>
     </a-list-item>

@@ -11,7 +11,7 @@
             <a slot="title">
               <h3>{{ item.name }}</h3>
             </a>
-            <template slot="description">
+            <template v-if="item.geodistance" slot="description">
               <span>
                 <a-tag>距离我：{{ item.geodistance }}km</a-tag>
               </span>

@@ -1,7 +1,7 @@
 import Uploader from './Uploader'
-import SocialCommentary from './SocialCommentary'
+import SocialComment from './SocialComment'
 
 export {
   Uploader,
-  SocialCommentary
+  SocialComment
 }

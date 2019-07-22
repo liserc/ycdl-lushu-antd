@@ -1,5 +1,12 @@
 import { axios } from '@/utils/request'
 
+export function getUserdetails (userId) {
+  return axios({
+    url: '/lushu/users/userdetails/' + userId,
+    method: 'get'
+  })
+}
+
 export function putObj (parameter) {
   return axios({
     url: '/lushu/users',

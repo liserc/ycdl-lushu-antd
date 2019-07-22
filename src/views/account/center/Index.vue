@@ -5,16 +5,24 @@
         <a-card :bordered="false">
           <div class="account-center-avatarHolder">
             <div class="avatar">
-              <img :src="avatar()">
+              <img :src="userInfo.avatar">
             </div>
-            <div class="username">{{ nickname() }}</div>
+            <div class="username">{{ userInfo.nickName }}</div>
             <div class="bio">海纳百川，有容乃大</div>
           </div>
           <div class="account-center-detail">
             <p>
               <i class="address"></i>
-              <span>浙江省</span>
-              <span>杭州市</span>
+              <span>{{ userInfo.sex | filterSex }} </span>
+            </p>
+            <p>
+              <i class="address"></i>
+              <span>{{ userInfo.age }} 岁</span>
+            </p>
+            <p>
+              <i class="address"></i>
+              <span>{{ userInfo.province }} </span>
+              <span>{{ userInfo.city }}</span>
             </p>
           </div>
           <a-divider/>
@@ -32,6 +40,9 @@
           <route-collection v-else-if="noTitleKey === 'route'" :collections="routeResults"></route-collection>
         </a-card>
       </a-col>
+      <a-col>
+        <a-back-top />
+      </a-col>
     </a-row>
   </div>
 </template>
@@ -42,8 +53,11 @@ import { AppPage, ArticlePage, ProjectPage, PointCollection, RouteCollection } f
 
 import { mapGetters } from 'vuex'
 import { getCollection } from '@/api/lushu/common'
+import { getUserdetails } from '@/api/user'
+import ACol from 'ant-design-vue/es/grid/Col'
 export default {
   components: {
+    ACol,
     RouteView,
     PageView,
     AppPage,
@@ -54,16 +68,21 @@ export default {
   },
   data () {
     return {
+      pathId: '',
+      userInfo: {
+        userId: '',
+        nickName: '',
+        avatar: '',
+        sex: '',
+        age: '',
+        province: '',
+        city: ''
+      },
       pointResults: [],
       routeResults: [],
       tags: ['很有想法的', '专注设计', '辣~', '大长腿', '川妹子', '海纳百川'],
-
       tagInputVisible: false,
       tagInputValue: '',
-
-      teams: [],
-      teamSpinning: true,
-
       tabListNoTitle: [
         {
           key: 'point',
@@ -77,30 +96,56 @@ export default {
       noTitleKey: 'point'
     }
   },
+  filters: {
+    filterSex (sex) {
+      let result
+      switch (sex) {
+        case 1:
+          result = '男'
+          break
+        case 2:
+          result = '女'
+          break
+        case 3:
+          result = '其他'
+          break
+        default:
+          break
+      }
+      return result
+    }
+  },
   created () {
-    getCollection().then(res => {
-      const { pointResults, routeResults } = res.data
-      this.pointResults = pointResults
-      this.routeResults = routeResults
-      this.tabListNoTitle[0].tab = '收藏单点(' + `${pointResults.length}` + ')'
-      this.tabListNoTitle[1].tab = '收藏路线(' + `${routeResults.length}` + ')'
-    })
+    this.pathId = this.$route.query.id
+    console.log('路由传值：' + this.pathId)
+    this.getUserInfo(this.pathId)
+    this.getRouteSocial(this.pathId)
   },
   mounted () {
-    this.getTeams()
   },
   methods: {
     ...mapGetters(['nickname', 'avatar']),
-
-    getTeams () {
-      this.$http.get('/workplace/teams').then(res => {
-        this.teams = res.result
-        this.teamSpinning = false
-      })
-    },
-
     handleTabChange (key, type) {
       this[type] = key
+    },
+    getUserInfo (userId) {
+      if (userId) {
+        getUserdetails(userId).then(res => {
+          const { data } = res
+          this.userInfo = data
+        })
+      } else {
+        this.userInfo = this.$store.getters.userInfo
+      }
+    },
+    getRouteSocial (userId) {
+      getCollection(userId).then(res => {
+        const { pointResults, routeResults } = res.data
+        this.pointResults = pointResults
+        this.routeResults = routeResults
+        this.tabListNoTitle[0].tab = '收藏单点(' + `${pointResults.length}` + ')'
+        this.tabListNoTitle[1].tab = '收藏路线(' + `${routeResults.length}` + ')'
+      })
     },
 
     handleTagClose (removeTag) {

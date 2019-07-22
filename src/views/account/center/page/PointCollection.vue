@@ -16,7 +16,7 @@
         <router-link slot="title" :to="'/point/details/'+item.pointId">{{ item.name }}</router-link>
         <template slot="description">
           <span>
-            <a-tag>{{ item.medias }} 标准点</a-tag>
+            <a-tag>{{ item.medias }} 标注点</a-tag>
           </span>
         </template>
       </a-list-item-meta>

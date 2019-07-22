@@ -23,9 +23,15 @@ export function postCommentReply (data) {
   })
 }
 
-export function getCollection () {
+export function getCollection (userId) {
+  let url
+  if (userId) {
+    url = '/lushu/routes/socials/details/' + userId
+  } else {
+    url = '/lushu/routes/socials/details'
+  }
   return axios({
-    url: '/system/lushu/routes/socials/details',
+    url: url,
     method: 'get'
   })
 }

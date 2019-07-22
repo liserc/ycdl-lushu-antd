@@ -1,7 +1,7 @@
-import Uploader from './Uploader'
-import SocialComment from './SocialComment'
+import PointGallery from './PointGallery'
+import PointList from './PointList'
 
 export {
-  Uploader,
-  SocialComment
+  PointGallery,
+  PointList
 }

@@ -66,6 +66,9 @@
     "webpack-theme-color-replacer": "^1.2.15"
   },
   "eslintConfig": {
+    "globals": {
+      "BMap": true
+    },
     "root": true,
     "env": {
       "node": true

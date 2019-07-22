@@ -82,11 +82,6 @@
                 <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
                   <a-list-item-meta>
                     <router-link slot="title" :to="'/route/details/'+item.routId">{{ item.name }}</router-link>
-                    <!--<a slot="title" href="https://vue.ant.design/">-->
-                    <!--<h3>{{ item.name }}</h3>-->
-                    <!--</a>-->
-                    <!--<a slot="title" :href="item.href">{{ item.name }}</a>-->
-                    <!--<a-avatar slot="avatar" :src="item.avatar"/>-->
                     <template slot="description">
                       <span>
                         <a-tag>步行</a-tag>
@@ -94,23 +89,15 @@
                       </span>
                     </template>
                   </a-list-item-meta>
-                  <!--<author-list-content :description="item.description" :owner="item.nickName" :avatar="item.avatar" :updateAt="item.updatedAt" />-->
-                  <author-list-content :description="item.description" :owner="item.nickName" :avatar="item.avatar" :href="item.avatar" :updateAt="item.start"/>
+                  <author-list-content :description="item.description" :owner="item.nickName" :avatar="item.avatar" :href="item.userId" :updateAt="item.start"/>
                   <div style="padding: 2px; margin-top: 5px">
                     <a-icon type="environment"/>
                     <span>贵州贵阳</span>
                   </div>
-                  <!--<template slot="actions" v-for="{type, text} in actions">-->
-                  <!--<span :key="type">-->
-                  <!--<a-icon :type="type" style="margin-right: 8px"/>-->
-                  <!--{{ text }}-->
-                  <!--</span>-->
-                  <!--</template>-->
                   <template slot="actions" v-for="{type, text} in actions">
                     <icon-text :type="type" :text="text" :key="text"/>
                   </template>
                   <img slot="extra" width="200" alt="logo" :src="item.snapshot"/>
-                  <!--{{ item.name }}-->
                 </a-list-item>
               </a-list>
             </a-card>
@@ -119,38 +106,6 @@
       </a-col>
       <a-back-top />
     </a-row>
-    <!--<a-list-->
-    <!--:grid="{gutter: 24, lg: 3, md: 2, sm: 1, xs: 1}"-->
-    <!--:dataSource="contents"-->
-    <!--&gt;-->
-    <!--<a-list-item slot="renderItem" slot-scope="item">-->
-    <!--<a-card :hoverable="true" :bodyStyle="{ padding: '2px' }" @click="cardClick(item.routId,item)">-->
-    <!--<img-->
-    <!--slot="cover"-->
-    <!--:src="item.snapshot"-->
-    <!--height="200"-->
-    <!--alt="图片无法加载"-->
-    <!--:preview="2"-->
-    <!--:preview-text="item.explain"/>-->
-    <!--<a-card-meta-->
-    <!--:title="item.nickName">-->
-    <!--<a-avatar slot="avatar" :src="item.avatar" />-->
-    <!--<template slot="description">-->
-    <!--<h3>{{ item.name }}</h3>-->
-    <!--</template>-->
-    <!--</a-card-meta>-->
-    <!--<div class="cardItemContent">-->
-    <!--<span>{{ item.uptime | fromNow }}</span>-->
-    <!--<div class="avatarList">-->
-    <!--<span>{{ item.city }} {{ item.district }} {{ item.street }}</span>-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--</a-card>-->
-    <!--</a-list-item>-->
-    <!--</a-list>-->
-    <!--<div slot="footer" v-if="!last" style="text-align: center; margin-top: 16px;">-->
-    <!--<a-button @click="loadMore" :loading="loadingMore">加载更多</a-button>-->
-    <!--</div>-->
   </div>
 </template>
 
@@ -162,11 +117,10 @@ import AInputSearch from 'ant-design-vue/es/input/Search'
 import ACol from 'ant-design-vue/es/grid/Col'
 import AuthorListContent from '@/components/AuthorListContent'
 import IconText from '@/components/IconText'
-import Tags from '@/views/lushu/route/components/tags.vue'
 import { LoadProvinceCode, LoadCityCode } from '@/components/ChinaAreaCode'
 
 export default {
-  components: { ACol, AInputSearch, ARow, AuthorListContent, IconText, Tags },
+  components: { ACol, AInputSearch, ARow, AuthorListContent, IconText },
   filters: {
     fromNow (date) {
       if (date) {

@@ -17,15 +17,6 @@
             <a-col :span="4">
               <span class="liStyle">海拔落差 {{ owner.drop }}m</span>
             </a-col>
-            <a-col :span="4">
-              &nbsp;
-            </a-col>
-            <a-col :span="2">
-              <a-button type="primary" size="small" @click="routeExport">导出</a-button>
-            </a-col>
-            <a-col :span="2">
-              <a-button type="primary" size="small" @click="routeCollection">收藏</a-button>
-            </a-col>
           </a-row>
           <a-row>
             <a-col>
@@ -110,11 +101,14 @@
     <br>
     <a-row>
       <a-col>
-        <a-card :bordered="false" :body-style="{padding:'5px'}">
-          <div>
-            <a-avatar :src="owner.avatar"/>
-            <span style="padding-left: 2px">{{ owner.nickName }} 上传于：{{ '1560329422031' |formatUptime }}</span>
-          </div>
+        <a-card :bordered="false" :body-style="{padding:'5px'}" >
+          <template>
+            <uploader
+              :owner="owner.nickName"
+              :avatar="owner.avatar"
+              :href="owner.avatar"
+              :updateAt="owner.uptime"/>
+          </template>
         </a-card>
       </a-col>
     </a-row>
@@ -123,10 +117,8 @@
       <a-col>
         <a-card>
           <a-divider orientation="left">评论信息</a-divider>
-          <!--<social-commentary></social-commentary>-->
           <social-comment :commentSubject="commentSubject" :comments="comments" @refreshComment="refreshComment"></social-comment>
         </a-card>
-        <!--<social-commentary/>-->
       </a-col>
     </a-row>
   </div>
@@ -134,13 +126,12 @@
 <script>
 import Vue from 'vue'
 import { loadBMap } from '@/assets/js/async-load-bmap.js'
-import { loadRoute } from '@/api/lushu/route/index.js'
-import { queryComment } from '@/api/lushu/common/index.js'
+import { loadRoute } from '@/api/lushu/route'
+import { queryComment } from '@/api/lushu/common'
 import { wgs84_to_bd09 } from '@/assets/js/gps-transform.js'
 import { Button, Carousel, CarouselItem } from 'element-ui'
 import moment from 'moment'
-import SocialCommentary from '@/components/Lushu/SocialCommentary'
-import SocialComment from '@/components/Lushu/SocialComment'
+import { Uploader, SocialComment } from '@/components/Lushu'
 import { Ellipsis } from '@/components'
 // 引入图片预览插件
 import preview from 'vue-photo-preview'
@@ -158,21 +149,18 @@ Vue.use(Button)
 Vue.use(Carousel)
 Vue.use(CarouselItem)
 
-// import MuseUI from 'muse-ui'
-// import 'muse-ui/dist/muse-ui.css'
-require('video.js/dist/video-js.css')
-require('vue-video-player/src/custom-theme.css')
 Vue.use(preview)
 Vue.use(VideoPlayer)
-// Vue.use(MuseUI)
+require('video.js/dist/video-js.css')
+require('vue-video-player/src/custom-theme.css')
 
 export default {
   components: {
     ACol,
     ARow,
     Aplayer,
-    SocialCommentary,
     Ellipsis,
+    Uploader,
     SocialComment
   },
   filters: {
@@ -333,7 +321,7 @@ export default {
       })
     },
     loadPolyline (locations) {
-      var polyline = new BMap.Polyline(locations, {
+      const polyline = new BMap.Polyline(locations, {
         strokeColor: '#00AA33', // 线路颜色
         strokeWeight: 4, // 线路大小
         //         线路类型(虚线)
@@ -387,12 +375,6 @@ export default {
     cardClick (index) {
       this.markers[this.now_index].setAnimation(0)
       this.showPoint(index)
-    },
-    routeExport () {
-      console.log('导出')
-    },
-    routeCollection () {
-      alert('收藏')
     },
     selectComments (id) {
       queryComment(id).then(response => {

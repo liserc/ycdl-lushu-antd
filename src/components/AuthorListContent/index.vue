@@ -7,7 +7,8 @@
     </div>
     <div class="extra">
       <a-avatar :src="avatar" size="small" />
-      <a :href="href">{{ owner }}</a> 上传于
+      <router-link :to="{path:'/account/center', query:{id:href}}">{{ owner }}</router-link> 上传于
+      <!--<a :href="href">{{ owner }}</a> 上传于-->
       <em>{{ updateAt | formatUptime }}</em>
     </div>
   </div>

@@ -2,6 +2,7 @@ const getters = {
   device: state => state.app.device,
   theme: state => state.app.theme,
   color: state => state.app.color,
+  userId: state => state.user.userId,
   token: state => state.user.token,
   avatar: state => state.user.avatar,
   nickname: state => state.user.name,

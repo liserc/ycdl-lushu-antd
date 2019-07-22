@@ -1,22 +1,41 @@
 <template>
-  <div class="antd-pro-components-article-list-content-index-listContent">
-    <div>
-      <slot>
-        {{ description }}
-      </slot>
-    </div>
-    <div class="extra">
-      <a-avatar :src="avatar" size="large" />
-      <a :href="href">{{ owner }}</a> 上传于
-      <em>{{ updateAt | formatUptime }}</em>
-    </div>
+
+  <div class="">
+    <a-row :gutter="16">
+      <a-col :span="20">
+        <div>
+          <slot>
+            {{ description }}
+          </slot>
+        </div>
+        <div>
+          <a-avatar :src="avatar"/>
+          <a :href="href">{{ owner }}</a> 上传于
+          <em>{{ updateAt | formatUptime }}</em>
+        </div>
+      </a-col>
+      <a-col :span="4">
+        <div style="cursor: pointer;text-align: center;margin-top: 2px">
+          <span @click="onSocial">
+            <a-icon type="like" theme="twoTone" :twoToneColor="twoToneColor"/>点赞
+          </span>
+          &nbsp;
+          <span>
+            <a-icon type="heart" theme="twoTone" :twoToneColor="twoToneColor"/>收藏
+          </span>
+        </div>
+      </a-col>
+    </a-row>
   </div>
 </template>
 
 <script>
 import moment from 'moment'
+import ARow from 'ant-design-vue/es/grid/Row'
+import ACol from 'ant-design-vue/es/grid/Col'
 export default {
   name: 'Uploader',
+  components: { ACol, ARow },
   props: {
     prefixCls: {
       type: String,
@@ -43,55 +62,31 @@ export default {
       default: ''
     }
   },
+  data () {
+    return {
+      twoToneColor: '#eb2f96',
+      routeSocial: {
+        socialType: '',
+        routeId: '',
+        routeType: '',
+        userId: ''
+      }
+    }
+  },
   filters: {
     formatUptime (date) {
       if (date) {
         return moment(Number(date)).format('YYYY-MM-DD HH:mm:ss')
       }
     }
+  },
+  methods: {
+    onSocial () {
+      console.log('点赞')
+    }
   }
 }
 </script>
 
 <style lang="less" scoped>
-  @import '../index.less';
-
-  .antd-pro-components-article-list-content-index-listContent {
-    .description {
-      max-width: 720px;
-      line-height: 22px;
-    }
-    .extra {
-      margin-top: 16px;
-      color: @text-color-secondary;
-      line-height: 22px;
-
-      & /deep/ .ant-avatar {
-        position: relative;
-        top: 1px;
-        width: 20px;
-        height: 20px;
-        margin-right: 8px;
-        vertical-align: top;
-      }
-
-      & > em {
-        /*margin-left: 16px;*/
-        color: @disabled-color;
-        font-style: normal;
-      }
-    }
-  }
-
-  @media screen and (max-width: @screen-xs) {
-    .antd-pro-components-article-list-content-index-listContent {
-      .extra {
-        & > em {
-          display: block;
-          margin-top: 8px;
-          margin-left: 0;
-        }
-      }
-    }
-  }
 </style>
