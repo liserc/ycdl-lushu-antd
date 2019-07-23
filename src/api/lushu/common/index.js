@@ -2,14 +2,14 @@ import { axios } from '@/utils/request'
 
 export function queryComment (id) {
   return axios({
-    url: '/system/lushu/routes/comments/' + id,
+    url: '/lushu/routes/comments/' + id,
     method: 'get'
   })
 }
 
 export function postComment (data) {
   return axios({
-    url: '/system/lushu/routes/comments/',
+    url: '/lushu/routes/comments/',
     method: 'post',
     data: data
   })
@@ -17,7 +17,7 @@ export function postComment (data) {
 
 export function postCommentReply (data) {
   return axios({
-    url: '/system/lushu/routes/comments/reply',
+    url: '/lushu/routes/comments/reply',
     method: 'post',
     data: data
   })
@@ -33,5 +33,28 @@ export function getCollection (userId) {
   return axios({
     url: url,
     method: 'get'
+  })
+}
+
+export function getSocialStatus (id) {
+  return axios({
+    url: '/lushu/routes/socials/status/' + id,
+    method: 'get'
+  })
+}
+
+export function postSocial (data) {
+  return axios({
+    url: '/lushu/routes/socials',
+    method: 'post',
+    data: data
+  })
+}
+
+export function deleteSocial (data) {
+  return axios({
+    url: '/lushu/routes/socials',
+    method: 'delete',
+    data: data
   })
 }

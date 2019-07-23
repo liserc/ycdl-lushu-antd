@@ -104,10 +104,13 @@
         <a-card :bordered="false" :body-style="{padding:'5px'}" >
           <template>
             <uploader
-              :owner="owner.nickName"
-              :avatar="owner.avatar"
-              :href="owner.avatar"
-              :updateAt="owner.uptime"/>
+              :owner="authorSubject.nickName"
+              :avatar="authorSubject.avatar"
+              :href="authorSubject.userId"
+              :updateAt="authorSubject.uptime"
+              :routeId="authorSubject.routeId"
+              :routeType="authorSubject.routeType"
+            />
           </template>
         </a-card>
       </a-col>
@@ -222,11 +225,14 @@ export default {
         },
         pageSize: 3
       },
-      actions: [
-        { type: 'star-o', text: '156' },
-        { type: 'like-o', text: '156' },
-        { type: 'message', text: '2' }
-      ],
+      authorSubject: {
+        routeId: '',
+        routeType: 1,
+        userId: '',
+        nickName: '',
+        avatar: '',
+        uptime: ''
+      },
       commentSubject: {
         routeId: '',
         userId: '',
@@ -266,6 +272,7 @@ export default {
       loadRoute(id)
         .then(response => {
           this.owner = response.data
+          this.authorAssignment(response.data)
           const { locations, keypoints } = response.data
           const rLocations = []
           locations.forEach(function (val) {
@@ -291,9 +298,13 @@ export default {
           console.log('加载数据失败', error)
         })
     },
-    carouselChange (index) {
-      this.markers[this.now_index].setAnimation(0)
-      this.showPoint(index)
+    authorAssignment (data) {
+      const { routId, userId, nickName, avatar, uptime } = data
+      this.authorSubject.routeId = routId
+      this.authorSubject.userId = userId
+      this.authorSubject.nickName = nickName
+      this.authorSubject.avatar = avatar
+      this.authorSubject.uptime = uptime
     },
     loadKeyPoints (points) {
       this.all_index = points.length
@@ -346,29 +357,10 @@ export default {
       this.now_index = i
       this.markers[i].setAnimation(2)
     },
-    nextNode () {
-      this.markers[this.now_index].setAnimation(0)
-      this.now_index++
-      if (this.now_index > this.all_index - 1) {
-        this.now_index = 0
-      }
-      this.showPoint(this.now_index)
-    },
-    previousNode () {
-      this.markers[this.now_index].setAnimation(0)
-      this.now_index--
-      if (this.now_index < 0) {
-        this.now_index = this.all_index - 1
-      }
-      this.showPoint(this.now_index)
-    },
     addMarker (point, imgurl) {
-      // eslint-disable-next-line no-undef
       const myIcon = new BMap.Icon(imgurl, new BMap.Size(38, 38), {
-        // eslint-disable-next-line no-undef
         anchor: new BMap.Size(22, 38)
       })
-      // eslint-disable-next-line no-undef
       const marker = new BMap.Marker(point, { icon: myIcon })
       this.map.addOverlay(marker)
     },

@@ -39,7 +39,7 @@
           <span slot="title">地区</span>
           <div style="margin-top: 0px">
             <a-radio-group
-              v-model="query.province"
+              v-model="chinaArea.provinceCode"
               :defaultValue="''"
               name="provinceRadio"
               @change="provinceRadioChange"
@@ -51,9 +51,10 @@
           <a-divider />
           <div v-if="selectProvince">
             <a-radio-group
-              v-model="query.city"
+              v-model="chinaArea.cityCode"
               :defaultValue="0"
               name="cityRadio"
+              @change="cityRadioChange"
               buttonStyle="solid"
               size="small">
               <a-radio-button v-for="item in cityRadios" :key="item.value" :value="item.value">{{ item.label }}</a-radio-button>
@@ -84,18 +85,21 @@
                     <router-link slot="title" :to="'/route/details/'+item.routId">{{ item.name }}</router-link>
                     <template slot="description">
                       <span>
-                        <a-tag>步行</a-tag>
-                        <a-tag>{{ item.mileage }}</a-tag>
+                        <a-tag>{{ item.record | filterRecord }}</a-tag>
+                        <a-tag>{{ item.mileage | filterMileage }} km</a-tag>
+                        <a-tag>{{ item.medias }} 标注点</a-tag>
                       </span>
                     </template>
                   </a-list-item-meta>
                   <author-list-content :description="item.description" :owner="item.nickName" :avatar="item.avatar" :href="item.userId" :updateAt="item.start"/>
-                  <div style="padding: 2px; margin-top: 5px">
+                  <div v-if="item.city" style="padding: 2px; margin-top: 5px">
                     <a-icon type="environment"/>
-                    <span>贵州贵阳</span>
+                    <span>{{ item.city }} {{ item.district }}</span>
                   </div>
-                  <template slot="actions" v-for="{type, text} in actions">
-                    <icon-text :type="type" :text="text" :key="text"/>
+                  <template slot="actions">
+                    <icon-text type="like-o" :text="item.praise" />
+                    <icon-text type="star-o" :text="item.collection" />
+                    <icon-text type="message" :text="item.comment" />
                   </template>
                   <img slot="extra" width="200" alt="logo" :src="item.snapshot"/>
                 </a-list-item>
@@ -117,7 +121,7 @@ import AInputSearch from 'ant-design-vue/es/input/Search'
 import ACol from 'ant-design-vue/es/grid/Col'
 import AuthorListContent from '@/components/AuthorListContent'
 import IconText from '@/components/IconText'
-import { LoadProvinceCode, LoadCityCode } from '@/components/ChinaAreaCode'
+import { LoadCityCode, LoadCityLabel, LoadProvinceCode, LoadProvinceLabel } from '@/components/ChinaAreaCode'
 
 export default {
   components: { ACol, AInputSearch, ARow, AuthorListContent, IconText },
@@ -125,6 +129,18 @@ export default {
     fromNow (date) {
       if (date) {
         return moment(parseInt(date)).fromNow()
+      }
+    },
+    filterRecord (record) {
+      if (record === 1) {
+        return '步行'
+      } else {
+        return '驾车'
+      }
+    },
+    filterMileage (data) {
+      if (data) {
+        return parseFloat(data / 1000).toFixed(2)
       }
     }
   },
@@ -142,6 +158,12 @@ export default {
         mileage: undefined,
         province: undefined,
         city: undefined
+      },
+      chinaArea: {
+        provinceCode: '',
+        provinceLabel: '',
+        cityCode: '',
+        cityLabel: ''
       },
       selectProvince: false,
       last: false,
@@ -225,6 +247,7 @@ export default {
       // this.query.page += 1
       this.query.page = currentPage
       this.query.size = this.pagination.pageSize
+      console.log('分页查询参数：', this.query)
       page(this.query).then(response => {
         const { content, totalElements, totalPages, number, last, empty } = response.data
         this.query.page = number
@@ -234,47 +257,32 @@ export default {
         this.pagination.total = Number(totalElements)
         this.loading = false
         this.contents = content
-        // if (!empty) {
-        //   this.contents = content
-        //   this.contents.push(...content)
-        // }
       })
     },
     filterSearch () {
       this.pageQuery(0)
     },
     provinceRadioChange () {
-      const code = this.query.province
-      if (code) {
+      const { provinceCode } = this.chinaArea
+      if (provinceCode) {
         this.selectProvince = true
-        this.cityRadios = LoadCityCode(code)
-        console.log('地区编码：', this.cityRadios)
+        this.cityRadios = LoadCityCode(provinceCode)
+        this.query.province = LoadProvinceLabel(provinceCode)
       } else {
         this.selectProvince = false
+        this.chinaArea.cityRadios = []
+        this.query.province = undefined
+      }
+      this.filterSearch()
+    },
+    cityRadioChange () {
+      const { provinceCode, cityCode } = this.chinaArea
+      if (cityCode) {
+        this.query.city = LoadCityLabel(provinceCode, cityCode)
+      } else {
         this.query.city = undefined
       }
-      this.pageQuery(0)
-    },
-    loadMore () {
-      this.pageQuery()
-    },
-    handleTagChange (type, tag) {
-      console.log('选中标签：', type, tag)
-    },
-    handleSizeChange (val) {
-      this.query.size = val
-      this.pageQuery()
-    },
-    handleCurrentChange (val) {
-      this.query.page = val
-      this.pageQuery()
-    },
-    cardClick (id, item) {
-      const that = this.$router
-      that.push({
-        path: '/route/details/' + id,
-        query: null
-      })
+      this.filterSearch()
     }
   }
 }

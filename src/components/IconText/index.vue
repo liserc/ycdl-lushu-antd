@@ -1,7 +1,7 @@
 <template>
   <span>
     <a-icon :type="type" style="margin-right: 8px" />
-    {{ text }}
+    {{ text | filterText }}
   </span>
 </template>
 
@@ -15,7 +15,16 @@ export default {
     },
     text: {
       type: [String, Number],
-      default: ''
+      default: 0
+    }
+  },
+  filters: {
+    filterText (text) {
+      if (text) {
+        return text
+      } else {
+        return 0
+      }
     }
   }
 }

@@ -33,8 +33,11 @@
             <uploader
               :owner="authorSubject.nickName"
               :avatar="authorSubject.avatar"
-              :href="authorSubject.avatar"
-              :updateAt="authorSubject.uptime"/>
+              :href="authorSubject.userId"
+              :updateAt="authorSubject.uptime"
+              :routeId="authorSubject.routeId"
+              :routeType="authorSubject.routeType"
+            />
           </template>
         </a-card>
       </a-col>
@@ -117,7 +120,8 @@ export default {
       },
       images: [],
       authorSubject: {
-        pointId: '',
+        routeId: '',
+        routeType: 0,
         userId: '',
         nickName: '',
         avatar: '',
@@ -298,12 +302,11 @@ export default {
     },
     selection (item) {
       const { pointId, userId, nickName, avatar, uptime, medias, keypoints } = item
-      this.authorSubject.pointId = pointId
+      this.authorSubject.routeId = pointId
       this.authorSubject.userId = userId
       this.authorSubject.nickName = nickName
       this.authorSubject.avatar = avatar
       this.authorSubject.uptime = uptime
-
       this.commentSubject.routeId = pointId
       this.commentSubject.userId = this.$store.getters.userId
       this.medias = medias

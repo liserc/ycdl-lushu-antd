@@ -22,7 +22,7 @@
           </span>
         </template>
       </a-list-item-meta>
-      <p>
+      <p v-if="item.province">
         <a-icon type="environment"/>
         <span>{{ item.province }} </span>
         <span>{{ item.city }}</span>

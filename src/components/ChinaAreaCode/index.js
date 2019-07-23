@@ -73,8 +73,31 @@ function ProvinceAndCityCascades () {
   return province
 }
 
+/**
+ * 加载省级名称
+ * @param provinceCode
+ * @returns {*}
+ * @constructor
+ */
+function LoadProvinceLabel (provinceCode) {
+  return areaCode[provinceCode]
+}
+
+/**
+ * 加载市级名称
+ * @param provinceCode
+ * @param cityCode
+ * @returns {*}
+ * @constructor
+ */
+function LoadCityLabel (provinceCode, cityCode) {
+  return REGION_DATA[provinceCode][cityCode]
+}
+
 export {
   LoadProvinceCode,
   LoadCityCode,
-  ProvinceAndCityCascades
+  ProvinceAndCityCascades,
+  LoadProvinceLabel,
+  LoadCityLabel
 }

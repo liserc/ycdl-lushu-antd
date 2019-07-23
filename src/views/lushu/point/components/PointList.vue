@@ -11,9 +11,10 @@
             <a slot="title">
               <h3>{{ item.name }}</h3>
             </a>
-            <template v-if="item.geodistance" slot="description">
+            <template slot="description">
               <span>
-                <a-tag>距离我：{{ item.geodistance }}km</a-tag>
+                <a-tag v-if="item.geodistance">距离我：{{ item.geodistance }}km</a-tag>
+                <a-tag>{{ item.medias }} 标注点</a-tag>
               </span>
             </template>
           </a-list-item-meta>
@@ -21,8 +22,10 @@
             <a-icon type="environment"/>
             <span>{{ item.city }} {{ item.district }}</span>
           </div>
-          <template slot="actions" v-for="{type, text} in actions">
-            <icon-text :type="type" :text="text" :key="text"/>
+          <template slot="actions">
+            <icon-text type="like-o" :text="item.praise" />
+            <icon-text type="star-o" :text="item.collection" />
+            <icon-text type="message" :text="item.comment" />
           </template>
         </a-list-item>
       </a-list>
@@ -63,7 +66,6 @@ export default {
   },
   methods: {
     listItemClick (item) {
-      console.log('选中行：', item)
       this.$emit('selection', item)
     }
   }
