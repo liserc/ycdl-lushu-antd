@@ -11,7 +11,7 @@
           <span slot="title">类型</span>
           <div>
             <a-radio-group
-              v-model="query.type"
+              v-model="query.record"
               :defaultValue="''"
               @change="filterSearch"
               name="typeRadio"
@@ -154,7 +154,7 @@ export default {
         page: 0,
         size: undefined,
         keyword: undefined,
-        type: undefined,
+        record: undefined,
         mileage: undefined,
         province: undefined,
         city: undefined
@@ -179,11 +179,6 @@ export default {
         pageSize: 10,
         total: 0
       },
-      actions: [
-        { type: 'star-o', text: '156' },
-        { type: 'like-o', text: '156' },
-        { type: 'message', text: '2' }
-      ],
       typeRadios: [
         {
           label: '全部',
@@ -195,7 +190,7 @@ export default {
         },
         {
           label: '驾车',
-          value: 2
+          value: 0
         }
       ],
       mileageRadios: [
@@ -257,6 +252,8 @@ export default {
         this.pagination.total = Number(totalElements)
         this.loading = false
         this.contents = content
+      }).catch(() => {
+        this.loading = false
       })
     },
     filterSearch () {

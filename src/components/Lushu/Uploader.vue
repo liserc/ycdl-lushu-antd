@@ -115,30 +115,36 @@ export default {
         const { praise, collection } = res.data
         this.routeSocialStatus.praise = praise
         this.routeSocialStatus.collection = collection
-        if (praise) {
-          this.praiseTwoTone.color = '#eb2f96'
-          this.praiseTwoTone.text = '已点赞'
-        } else {
-          this.praiseTwoTone.color = ''
-          this.praiseTwoTone.text = '点赞'
-        }
-        if (collection) {
-          this.collectionTwoTone.color = '#eb2f96'
-          this.collectionTwoTone.text = '已收藏'
-        } else {
-          this.collectionTwoTone.color = ''
-          this.collectionTwoTone.text = '收藏'
-        }
+        this.twoToneColorChange()
       })
+    },
+    twoToneColorChange () {
+      const { praise, collection } = this.routeSocialStatus
+      if (praise) {
+        this.praiseTwoTone.color = '#eb2f96'
+        this.praiseTwoTone.text = '已点赞'
+      } else {
+        this.praiseTwoTone.color = ''
+        this.praiseTwoTone.text = '点赞'
+      }
+      if (collection) {
+        this.collectionTwoTone.color = '#eb2f96'
+        this.collectionTwoTone.text = '已收藏'
+      } else {
+        this.collectionTwoTone.color = ''
+        this.collectionTwoTone.text = '收藏'
+      }
     },
     onPraise () {
       const { praise } = this.routeSocialStatus
       this.routeSocial.socialType = 1
       if (praise) {
         // 取消点赞
+        this.routeSocialStatus.praise = false
         this.cancelSocial()
       } else {
         // 点赞
+        this.routeSocialStatus.praise = true
         this.commitSocial()
       }
     },
@@ -147,20 +153,22 @@ export default {
       this.routeSocial.socialType = 2
       if (collection) {
         // 取消收藏
+        this.routeSocialStatus.collection = false
         this.cancelSocial()
       } else {
         // 收藏
+        this.routeSocialStatus.collection = true
         this.commitSocial()
       }
     },
     commitSocial () {
       postSocial(this.routeSocial).then(() => {
-        this.querySocialStatus()
+        this.twoToneColorChange()
       })
     },
     cancelSocial () {
       deleteSocial(this.routeSocial).then(() => {
-        this.querySocialStatus()
+        this.twoToneColorChange()
       })
     }
   }

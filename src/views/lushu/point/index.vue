@@ -63,7 +63,9 @@
           </template>
         </a-card>
       </a-col>
-      <a-back-top />
+      <a-col>
+        <a-back-top />
+      </a-col>
     </a-row>
   </div>
 </template>
