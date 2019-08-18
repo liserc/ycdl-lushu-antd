@@ -5,21 +5,22 @@ import { welcome } from '@/utils/util'
 
 const user = {
   state: {
-    userId: '',
     token: '',
-    name: '',
-    welcome: '',
+    loadedUserDetails: false,
+    userId: '',
+    nickname: '',
     avatar: '',
     roles: [],
-    info: {}
+    userdetails: {},
+    welcome: ''
   },
 
   mutations: {
     SET_TOKEN: (state, token) => {
       state.token = token
     },
-    SET_NAME: (state, { name, welcome }) => {
-      state.name = name
+    SET_NICKNAME: (state, { name, welcome }) => {
+      state.nickname = name
       state.welcome = welcome
     },
     SET_AVATAR: (state, avatar) => {
@@ -28,9 +29,11 @@ const user = {
     SET_ROLES: (state, roles) => {
       state.roles = roles
     },
-    SET_INFO: (state, info) => {
-      state.userId = info.userId
-      state.info = info
+    SET_USERDETAILS: (state, data) => {
+      // 已加载完用户信息
+      state.loadedUserDetails = true
+      state.userId = data.userId
+      state.userdetails = data
     }
   },
 
@@ -50,15 +53,15 @@ const user = {
     },
 
     // 获取用户信息
-    GetInfo ({ commit }) {
+    GetUserDetails ({ commit }) {
       return new Promise((resolve, reject) => {
         getInfo().then(response => {
           const { data } = response
           const { nickName, avatar } = data
           commit('SET_ROLES', ['ROLE_USER'])
-          commit('SET_INFO', data)
-          commit('SET_NAME', { name: nickName, welcome: welcome() })
+          commit('SET_NICKNAME', { name: nickName, welcome: welcome() })
           commit('SET_AVATAR', avatar)
+          commit('SET_USERDETAILS', data)
           resolve(response)
         }).catch(error => {
           reject(error)

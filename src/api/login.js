@@ -23,14 +23,14 @@ export function login (parameter) {
   })
 }
 
-export function getSmsCaptcha (mobile, register) {
+export function getSmsCaptcha (parameter) {
   return axios({
-    url: '/auth/captcha/sms/' + mobile,
+    url: '/auth/captcha/sms',
     method: 'get',
     headers: {
       'Authorization': 'Basic MjE1MzY1NDoxMjM0NTY='
     },
-    params: { register }
+    params: parameter
   })
 }
 

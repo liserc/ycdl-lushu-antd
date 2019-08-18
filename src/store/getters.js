@@ -2,14 +2,15 @@ const getters = {
   device: state => state.app.device,
   theme: state => state.app.theme,
   color: state => state.app.color,
-  userId: state => state.user.userId,
   token: state => state.user.token,
+  loadedUserDetails: state => state.user.loadedUserDetails,
+  userId: state => state.user.userId,
+  nickname: state => state.user.nickname,
   avatar: state => state.user.avatar,
-  nickname: state => state.user.name,
-  welcome: state => state.user.welcome,
   roles: state => state.user.roles,
-  userInfo: state => state.user.info,
-  addRouters: state => state.permission.addRouters,
+  userdetails: state => state.user.userdetails,
+  welcome: state => state.user.welcome,
+  routers: state => state.permission.routers,
   multiTab: state => state.app.multiTab
 }
 

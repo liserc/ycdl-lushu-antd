@@ -37,16 +37,21 @@ function hasRole(roles, route) {
   }
 }
 
+/**
+ * 过滤异步路由
+ * @param routerMap
+ * @param roles
+ * @returns {*}
+ */
 function filterAsyncRouter (routerMap, roles) {
   const accessedRouters = routerMap.filter(route => {
-    // if (hasPermission(roles.permissionList, route)) {
-    //   if (route.children && route.children.length) {
-    //     route.children = filterAsyncRouter(route.children, roles)
-    //   }
-    //   return true
-    // }
-    // return false
-    return true
+    if (hasPermission(roles.permissionList, route)) {
+      if (route.children && route.children.length) {
+        route.children = filterAsyncRouter(route.children, roles)
+      }
+      return true
+    }
+    return false
   })
   return accessedRouters
 }

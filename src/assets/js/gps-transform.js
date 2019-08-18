@@ -72,7 +72,7 @@ function wgs84togcj02 (lng, lat) {
  * @param lat
  * @returns {*[]}
  */
-function gcj02towgs84 (lng, lat) {
+export function gcj02towgs84 (lng, lat) {
   if (out_of_china(lng, lat)) {
     return [lng, lat]
   } else {
@@ -84,8 +84,8 @@ function gcj02towgs84 (lng, lat) {
     var sqrtmagic = Math.sqrt(magic)
     dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtmagic) * PI)
     dlng = (dlng * 180.0) / (a / sqrtmagic * Math.cos(radlat) * PI)
-    mglat = lat + dlat
-    mglng = lng + dlng
+    const mglat = lat + dlat
+    const mglng = lng + dlng
     return [lng * 2 - mglng, lat * 2 - mglat]
   }
 }

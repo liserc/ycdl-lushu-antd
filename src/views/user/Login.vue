@@ -42,7 +42,7 @@
             </a-input>
           </a-form-item>
         </a-tab-pane>
-        <a-tab-pane key="mobile" tab="手机号登录">
+        <a-tab-pane key="mobile" tab="短信登录">
           <a-form-item>
             <a-input size="large" type="text" placeholder="手机号" v-decorator="['mobile', {rules: [{ required: true, pattern: /^1[34578]\d{9}$/, message: '请输入正确的手机号' }], validateTrigger: 'change'}]">
               <a-icon slot="prefix" type="mobile" :style="{ color: 'rgba(0,0,0,.25)' }"/>
@@ -192,8 +192,7 @@ export default {
           loginParams.password = values.password
           loginParams.grant_type = grantType
           Login(loginParams)
-            .then((res) => this.loginSuccess(res))
-            .catch(err => this.requestFailed(err))
+            .then(res => this.loginSuccess(res))
             .finally(() => {
               state.loginBtn = false
             })
@@ -222,18 +221,20 @@ export default {
 
           const hide = this.$message.loading('验证码发送中...', 0)
           getSmsCaptcha(values.mobile, false).then(res => {
-            setTimeout(hide, 2500)
-            this.$notification['success']({
+            setTimeout(hide, 1)
+            this.$message.success('短信验证码发送成功', 2.5)
+            /* this.$notification['success']({
               message: '提示',
               description: '请输入您接收到的短信验证码',
               duration: 8
-            })
-          }).catch(err => {
+            }) */
+          }).catch(() => {
             setTimeout(hide, 1)
+            this.$message.error('短信验证码发送失败', 2.5)
             clearInterval(interval)
             state.time = 60
             state.smsSendBtn = false
-            this.requestFailed(err)
+            // this.requestFailed(err)
           })
         }
       })
@@ -248,7 +249,6 @@ export default {
       })
     },
     loginSuccess (res) {
-      console.log(res)
       this.$router.push({ name: 'home' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
@@ -257,14 +257,15 @@ export default {
           description: `${timeFix()}，欢迎回来`
         })
       }, 1000)
-    },
-    requestFailed (err) {
+    }
+    /* requestFailed (err) {
+      console.log('错误信息：', err)
       this.$notification['error']({
         message: '错误',
         description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
         duration: 4
       })
-    }
+    } */
   }
 }
 </script>

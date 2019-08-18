@@ -6,15 +6,15 @@
         size="small"
         :loading="loading"
         :dataSource="contents">
-        <a-list-item slot="renderItem" slot-scope="item, index" :key="index" @click="listItemClick(item)">
+        <a-list-item slot="renderItem" slot-scope="item, index" :id="index" :key="index" @click="listItemClick(item,index)">
           <a-list-item-meta>
             <a slot="title">
               <h3>{{ item.name }}</h3>
             </a>
             <template slot="description">
               <span>
-                <a-tag v-if="item.geodistance">距离我：{{ item.geodistance }}km</a-tag>
-                <a-tag>{{ item.medias }} 标注点</a-tag>
+                <a-tag color="green" v-if="item.geodistance">距离我：{{ item.geodistance }}km</a-tag>
+                <a-tag color="blue">{{ item.medias }} 标注点</a-tag>
               </span>
             </template>
           </a-list-item-meta>
@@ -53,6 +53,10 @@ export default {
       default: () => {
         return []
       }
+    },
+    currentId: {
+      type: [String, Number],
+      default: 0
     }
   },
   data () {
@@ -64,9 +68,17 @@ export default {
       ]
     }
   },
+  watch: {
+    currentId (val) {
+      this.scrollToListItem(val)
+    }
+  },
   methods: {
-    listItemClick (item) {
-      this.$emit('selection', item)
+    listItemClick (item, index) {
+      this.$emit('selection', item, index)
+    },
+    scrollToListItem (id) {
+      document.getElementById(id).scrollIntoView()
     }
   }
 }

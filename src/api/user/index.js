@@ -7,6 +7,14 @@ export function getUserdetails (userId) {
   })
 }
 
+export function postUser (parameter) {
+  return axios({
+    url: '/lushu/users/registration',
+    method: 'post',
+    data: parameter
+  })
+}
+
 export function putObj (parameter) {
   return axios({
     url: '/lushu/users',
@@ -28,6 +36,37 @@ export function uploadTheAvatar (user, parameter) {
     headers: {
       'Content-Type': 'multipart/form-data'
     },
+    data: parameter
+  })
+}
+
+export function putAccountPassword (parameter) {
+  return axios({
+    url: '/lushu/users/account/password',
+    method: 'put',
+    data: parameter
+  })
+}
+
+export function getAccountBind () {
+  return axios({
+    url: '/lushu/users/account/bind',
+    method: 'get'
+  })
+}
+
+export function postAccountBind (parameter) {
+  return axios({
+    url: '/lushu/users/account/bind',
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function deleteAccountBind (parameter) {
+  return axios({
+    url: '/lushu/users/account/bind',
+    method: 'delete',
     data: parameter
   })
 }

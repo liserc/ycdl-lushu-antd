@@ -85,9 +85,9 @@
                     <router-link slot="title" :to="'/route/details/'+item.routId">{{ item.name }}</router-link>
                     <template slot="description">
                       <span>
-                        <a-tag>{{ item.record | filterRecord }}</a-tag>
-                        <a-tag>{{ item.mileage | filterMileage }} km</a-tag>
-                        <a-tag>{{ item.medias }} 标注点</a-tag>
+                        <a-tag color="blue">{{ item.record | filterRecord }}</a-tag>
+                        <a-tag color="cyan">{{ item.mileage | filterMileage }} km</a-tag>
+                        <a-tag color="green">{{ item.medias }} 标注点</a-tag>
                       </span>
                     </template>
                   </a-list-item-meta>
@@ -236,13 +236,8 @@ export default {
       window.scrollTo(0, 0)
     },
     pageQuery (currentPage) {
-      // if (this.last) {
-      //   return
-      // }
-      // this.query.page += 1
       this.query.page = currentPage
       this.query.size = this.pagination.pageSize
-      console.log('分页查询参数：', this.query)
       page(this.query).then(response => {
         const { content, totalElements, totalPages, number, last, empty } = response.data
         this.query.page = number

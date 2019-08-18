@@ -5,7 +5,11 @@
         <a-form v-model="form" layout="vertical">
           <a-form-item
             label="昵称">
-            <a-input v-model="form.nickName" placeholder="给自己起个名字" />
+            <a-input v-model="form.nickName" placeholder="未设置" />
+          </a-form-item>
+          <a-form-item
+            label="个性签名">
+            <a-input v-model="form.signature" placeholder="未设置" />
           </a-form-item>
           <a-form-item
             label="性别"
@@ -24,7 +28,7 @@
           <a-form-item
             label="所在地区"
             :required="false">
-            <a-cascader :options="area" v-model="belongArea" placeholder="请选择所在地区" />
+            <a-cascader :options="area" v-model="belongArea" placeholder="未设置" />
           </a-form-item>
           <a-form-item>
             <a-button type="primary" @click="handleSubmit">提交</a-button>
@@ -41,10 +45,7 @@
         </div>
       </a-col>
     </a-row>
-
-    <avatar-modal ref="modal">
-
-    </avatar-modal>
+    <avatar-modal ref="modal" @refreshUserDetails="refreshUserDetails"/>
   </div>
 </template>
 
@@ -63,6 +64,7 @@ export default {
       form: {
         userId: null,
         nickName: null,
+        signature: null,
         avatar: null,
         sex: null,
         age: null,
@@ -94,7 +96,7 @@ export default {
   },
   methods: {
     getUserInfo () {
-      this.form = this.$store.getters.userInfo
+      this.form = this.$store.getters.userdetails
       const { province, city } = this.form
       if (province) {
         this.belongArea.push(province)
@@ -107,8 +109,15 @@ export default {
       this.form.province = this.belongArea[0]
       this.form.city = this.belongArea[1]
       putObj(this.form).then(() => {
-        this.$message.success('信息修改成功')
+        this.$store.dispatch('GetUserDetails').then(() => {
+          this.$message.success('信息修改成功')
+        })
+      }).catch(() => {
+        this.$message.error('信息修改失败')
       })
+    },
+    refreshUserDetails () {
+      this.getUserInfo()
     }
   }
 }

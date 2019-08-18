@@ -10,7 +10,7 @@
         </div>
         <div>
           <a-avatar :src="avatar"/>
-          <router-link :to="{path:'/account/center', query:{id:href}}">{{ owner }}</router-link> 上传于
+          <router-link :to="{path:'/account/center/'+href}">{{ owner }}</router-link> 上传于
           <em>{{ updateAt | formatUptime }}</em>
         </div>
       </a-col>
@@ -97,8 +97,11 @@ export default {
     }
   },
   created () {
-    this.routeSocial.userId = this.$store.getters.userId
     this.routeSocial.routeType = this.routeType
+    const { userId } = this.$store.getters
+    if (userId) {
+      this.routeSocial.userId = userId
+    }
   },
   watch: {
     routeId (val) {
@@ -107,8 +110,29 @@ export default {
     }
   },
   methods: {
+    needLoginIn () {
+      if (!this.$store.getters.loadedUserDetails) {
+        const router = this.$router
+        const fullPath = this.$route.fullPath
+        this.$confirm({
+          title: '提示',
+          content: '是否立即登录?',
+          onOk () {
+            router.push({ path: '/user/login', query: { redirect: fullPath } })
+          },
+          onCancel () {
+          }
+        })
+        return true
+      } else {
+        return false
+      }
+    },
     querySocialStatus () {
       if (!this.routeSocial.routeId) {
+        return
+      }
+      if (!this.$store.getters.loadedUserDetails) {
         return
       }
       getSocialStatus(this.routeSocial.routeId).then(res => {
@@ -162,11 +186,17 @@ export default {
       }
     },
     commitSocial () {
+      if (this.needLoginIn()) {
+        return
+      }
       postSocial(this.routeSocial).then(() => {
         this.twoToneColorChange()
       })
     },
     cancelSocial () {
+      if (this.needLoginIn()) {
+        return
+      }
       deleteSocial(this.routeSocial).then(() => {
         this.twoToneColorChange()
       })

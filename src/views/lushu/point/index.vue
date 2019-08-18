@@ -4,6 +4,47 @@
       <a-col :span="16">
         <a-card :bordered="false" :body-style="{padding:'2px'}">
           <div :id="mapId" class="bm-view">
+            <bm-info-window v-show="windowShow" :map="map" :title="bmInfoWindow.title" :position="bmInfoWindow.position">
+              <a-card
+                hoverable
+                style="width: 350px"
+                :bordered="true"
+              >
+                <image-carousel slot="cover"/>
+                <a-card-meta>
+                  <template slot="title">
+                    <span>{{ bmInfoWindow.name }}</span>
+                  </template>
+                  <a-avatar slot="avatar" :src="bmInfoWindow.avatar" />
+                  <template slot="description">
+                    <span>{{ bmInfoWindow.time | formatUptime }} </span>
+                  </template>
+                </a-card-meta>
+                <div style="margin-top: 5px">
+                  <a-row>
+                    <a-col>
+                      <div>
+                        <a-icon type="environment"/>
+                        <span>{{ bmInfoWindow.province }}{{ bmInfoWindow.city }}{{ bmInfoWindow.district }}{{ bmInfoWindow.street }}</span>
+                      </div>
+                    </a-col>
+                  </a-row>
+                </div>
+                <template class="ant-card-actions" slot="actions">
+                  <a-tooltip title="点赞">
+                    <a-icon type="like-o" />
+                  </a-tooltip>
+                  <a-tooltip title="收藏">
+                    <a-icon type="star-o" />
+                  </a-tooltip>
+                  <router-link slot="title" :to="'/point/details/'+bmInfoWindow.pointId">
+                    <a-tooltip title="详情">
+                      <a-icon type="ellipsis"></a-icon>
+                    </a-tooltip>
+                  </router-link>
+                </template>
+              </a-card>
+            </bm-info-window>
           </div>
           <div class="control">
             <a-row :gutter="8">
@@ -18,14 +59,13 @@
               </a-col>
             </a-row>
           </div>
-
         </a-card>
       </a-col>
       <a-col :span="8">
-        <point-list list-height="600px" :loading="loading" :contents="pointData" @selection="selection"/>
+        <point-list list-height="600px" :currentId="currentId" :loading="loading" :contents="pointData" @selection="selection"/>
       </a-col>
     </a-row>
-    <br>
+    <!--<br>
     <a-row>
       <a-col>
         <a-card :bordered="false" :body-style="{padding:'5px'}" >
@@ -66,7 +106,7 @@
       <a-col>
         <a-back-top />
       </a-col>
-    </a-row>
+    </a-row>-->
   </div>
 </template>
 <script>
@@ -74,12 +114,12 @@ import Vue from 'vue'
 import { search } from '@/api/lushu/point'
 import { queryComment } from '@/api/lushu/common'
 import { loadBMap } from '@/assets/js/async-load-bmap.js'
-import { wgs84_to_bd09 } from '@/assets/js/gps-transform.js'
+import { wgs84_to_bd09, gcj02towgs84 } from '@/assets/js/gps-transform.js'
 import moment from 'moment'
 import { Carousel, CarouselItem, Collapse, CollapseItem, Card, Button } from 'element-ui'
 import ACol from 'ant-design-vue/es/grid/Col'
-import { Uploader, SocialComment } from '@/components/Lushu'
-import { PointGallery, PointList } from './components'
+import { Uploader, SocialComment, BmInfoWindow } from '@/components/Lushu'
+import { PointGallery, PointList, ImageCarousel } from './components'
 import ARow from 'ant-design-vue/es/grid/Row'
 Vue.use(Carousel)
 Vue.use(CarouselItem)
@@ -88,7 +128,7 @@ Vue.use(CollapseItem)
 Vue.use(Card)
 Vue.use(Button)
 export default {
-  components: { ARow, ACol, Uploader, PointList, PointGallery, SocialComment },
+  components: { BmInfoWindow, ARow, ACol, Uploader, PointList, PointGallery, SocialComment, ImageCarousel },
   filters: {
     formatUptime (date) {
       if (date) {
@@ -101,12 +141,16 @@ export default {
       mapId: 'BMap-Lushu',
       map: null,
       zoom: 11,
+      currentId: null,
       points: [],
       markers: [],
-      icon: require('@/assets/images/ic_route_photo.png'),
-      currentLocation: null,
+      icons: {
+        0: require('@/assets/images/marker_single_point_40.png'),
+        1: require('@/assets/images/marker_user_40.png')
+      },
+      fixedPosition: null,
       query: {
-        keyword: undefined,
+        keyword: '贵阳',
         sLng: undefined,
         sLat: undefined,
         eLng: undefined,
@@ -121,6 +165,7 @@ export default {
         // 'http://duanly.oss-cn-shenzhen.aliyuncs.com/bmap/ic_route_photo.png'
       },
       images: [],
+      windowShow: false,
       authorSubject: {
         routeId: '',
         routeType: 0,
@@ -144,13 +189,16 @@ export default {
       mapSelecting: false,
       mapSelectionDragendIcon: require('@/assets/images/ic_map_select_point_48.png'),
       mapSelectionDraggingIcon: require('@/assets/images/ic_map_select_point_48x64.png'),
-      mapSelectionCenterMarker: null
+      mapSelectionCenterMarker: null,
+      bmInfoWindow: {
+        position: null
+      }
     }
-  },
-  mounted () {
   },
   created () {
     this.initMap()
+  },
+  mounted () {
   },
   methods: {
     initMap () {
@@ -165,83 +213,64 @@ export default {
               mapTypes: [BMAP_NORMAL_MAP, BMAP_HYBRID_MAP]
             })
           )
-          // this.map.setCurrentCity('北京') // 设置地图显示的城市 此项是必须设置的
           this.map.enableScrollWheelZoom(true) // 开启鼠标滚轮缩放
 
-          const that = this
+          const point = new BMap.Point(116.404, 39.915)
+          this.map.centerAndZoom(point, this.zoom)
+
+          /* const that = this
           // 浏览器定位获取当前经纬度坐标
-          const geolocation = new BMap.Geolocation()
+           const geolocation = new BMap.Geolocation()
           geolocation.getCurrentPosition(function (r) {
-            if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-              that.currentLocation = r.point
+            if (this.getStatus() === BMAP_STATUS_SUCCESS) {
+              that.fixedPosition = r.point
               that.map.centerAndZoom(r.point, that.zoom)
-              that.query.sLng = r.point.lng
-              that.query.sLat = r.point.lat
-              console.log('浏览器定位成功：', r.point)
+              console.log('浏览器定位成功', r.point)
+              that.positionSuccess()
             } else {
-              console.log('浏览器定位失败：', r)
-              that.$message.error('获取当前位置失败')
+              console.log('浏览器定位失败')
             }
-          })
-
-          // 开启SDK辅助定位
-          geolocation.enableSDKLocation()
-          geolocation.getCurrentPosition(function (r) {
-            if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-              console.log('SDK定位成功：', this)
-              that.currentLocation = r.point
-              that.map.centerAndZoom(r.point, that.zoom)
-              that.query.sLng = r.point.lng
-              that.query.sLat = r.point.lat
-            } else {
-              console.log('SDK定位失败：', this.getStatus())
-            }
-          })
-
-          // 添加定位控件
-          const geolocationControl = new BMap.GeolocationControl()
-          geolocationControl.addEventListener('locationSuccess', function (e) {
-            // 定位成功事件
-            var address = ''
-            address += e.addressComponent.province
-            address += e.addressComponent.city
-            address += e.addressComponent.district
-            address += e.addressComponent.street
-            address += e.addressComponent.streetNumber
-            alert('当前定位地址为：' + address)
-          })
-          geolocationControl.addEventListener('locationError', function (e) {
-            // 定位失败事件
-            alert(e.message)
-          })
-          that.map.addControl(geolocationControl)
+          }) */
 
           // 加载数据
           this.loadPoints()
         })
         .catch(error => {
           console.log('地图加载失败：', error)
-          this.$message.error('地图加载失败')
         })
+    },
+    positionSuccess () {
+      const { lng, lat } = this.fixedPosition
+      const location = gcj02towgs84(lng, lat)
+      this.query.sLng = location[0]
+      this.query.sLat = location[1]
+      const point = new BMap.Point(lng, lat)
+      const icon = new BMap.Icon(this.icons[1],
+        new BMap.Size(80, 40),
+        {
+          anchor: new BMap.Size(40, 40),
+          imageOffset: new BMap.Size(20, 0)
+        })
+      // 创建标注对象并添加到地图
+      const marker = new BMap.Marker(point, { icon: icon })
+      this.map.addOverlay(marker)
     },
     loadPoints () {
       search(this.query).then(response => {
         const { data } = response
         this.pointData = data
-        this.loading = false
         this.addMarkerClusterer(data)
-      }).catch(error => {
-        console.log('数据加载失败：', error)
-        this.$message.error('数据加载失败')
+      }).finally(() => {
+        this.loading = false
       })
     },
     addMarkerClusterer (data) {
       const that = this
       that.removeMarkers()
-      data.forEach(value => {
+      data.forEach((value, index) => {
         const location = wgs84_to_bd09(value.lng, value.lat)
         const point = new BMap.Point(location[0], location[1])
-        const marker = that.addMarkerToMap(point, value)
+        const marker = that.addMarkerToMap(point, value, index)
         that.points.push(point)
         that.markers.push(marker)
       })
@@ -256,27 +285,30 @@ export default {
         this.markerClusterer.clearMarkers(this.markers)
       }
     },
-    addMarkerToMap (point, value) {
-      const startIcon = new BMap.Icon(this.icon, new BMap.Size(80, 40), {
-        // 指定定位位置。
-        // 当标注显示在地图上时，其所指向的地理位置距离图标左上
-        // 角各偏移10像素和25像素。您可以看到在本例中该位置即是
-        // 图标中央下端的尖角位置。
-        anchor: new BMap.Size(40, 40),
-        // 设置图片偏移。
-        // 当您需要从一幅较大的图片中截取某部分作为标注图标时，您
-        // 需要指定大图的偏移位置，此做法与css sprites技术类似。
-        imageOffset: new BMap.Size(20, 0)
-      })
+    addMarkerToMap (point, value, index) {
+      const icon = new BMap.Icon(this.icons[0],
+        new BMap.Size(80, 40),
+        {
+          anchor: new BMap.Size(40, 40),
+          imageOffset: new BMap.Size(20, 0)
+        })
       // 创建标注对象并添加到地图
-      const marker = new BMap.Marker(point, { icon: startIcon })
+      const marker = new BMap.Marker(point, { icon: icon })
       this.map.addOverlay(marker)
-      const infoWindow = this.getInfoWindow(value)
+      const that = this
       marker.addEventListener('click', function () {
-        this.openInfoWindow(infoWindow)
+        that.bmInfoWindow.position = this.point
+        that.openInfoWindow(this.point, index, value)
       })
-
       return marker
+    },
+    openInfoWindow (position, index, value) {
+      this.windowShow = true
+      this.currentId = index
+      this.bmInfoWindow.position = position
+      for (const item in value) {
+        this.bmInfoWindow[item] = value[item]
+      }
     },
     getInfoWindow (value) {
       const sContent =
@@ -302,25 +334,8 @@ export default {
       console.log('点击查询：', this.query)
       this.loadPoints()
     },
-    selection (item) {
-      const { pointId, userId, nickName, avatar, uptime, medias, keypoints } = item
-      this.authorSubject.routeId = pointId
-      this.authorSubject.userId = userId
-      this.authorSubject.nickName = nickName
-      this.authorSubject.avatar = avatar
-      this.authorSubject.uptime = uptime
-      this.commentSubject.routeId = pointId
-      this.commentSubject.userId = this.$store.getters.userId
-      this.medias = medias
-      this.keypoints = keypoints
-      // if (keypoints && keypoints.length > 0) {
-      //   this.keypoints = keypoints
-      //   this.show = true
-      // } else {
-      //   this.show = false
-      // }
-      this.selectComments(pointId)
-      this.show = true
+    selection (item, index) {
+      this.markBeating(index)
     },
     selectComments (id) {
       queryComment(id).then(response => {
@@ -329,8 +344,11 @@ export default {
       })
     },
     refreshComment () {
-      console.log('刷新评论')
       this.selectComments(this.commentSubject.routeId)
+    },
+    markBeating (index) {
+      this.openInfoWindow(this.markers[index].point, index, this.pointData[index])
+      // this.map.centerAndZoom(position, this.map.getZoom())
     },
     onMapSelection () {
       this.mapSelecting = !this.mapSelecting
@@ -351,6 +369,8 @@ export default {
         this.map.removeEventListener('dragend', this.mapSelectionDragend)
         this.map.removeEventListener('dragging', this.mapSelectionDragging)
         this.mapSelectionCenterMarker.remove()
+        this.query.eLng = null
+        this.query.eLat = null
       }
     },
     addMapSelectionToMap (point, icon) {
@@ -384,7 +404,6 @@ export default {
       this.mapSelectionCenterMarker = this.addMapSelectionToMap(new BMap.Point(this.map.getCenter().lng, this.map.getCenter().lat), this.mapSelectionDraggingIcon)
     },
     mapSelectionQuery () {
-      console.log('地图选点坐标：', this.map.getCenter().lng, this.map.getCenter().lat)
       this.query.eLng = this.map.getCenter().lng
       this.query.eLat = this.map.getCenter().lat
       this.loadPoints()

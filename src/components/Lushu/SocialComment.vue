@@ -121,6 +121,25 @@ export default {
     this.reply.reviewerId = userId
   },
   methods: {
+    needLoginIn () {
+      if (!this.$store.getters.loadedUserDetails) {
+        const router = this.$router
+        const fullPath = this.$route.fullPath
+        this.$confirm({
+          title: '提示',
+          content: '是否立即登录?',
+          onOk () {
+            router.push({ path: '/user/login', query: { redirect: fullPath } })
+          },
+          onCancel () {
+          }
+        })
+        return true
+      } else {
+        return false
+      }
+    },
+
     /**
        * 点击取消按钮
        */
@@ -132,12 +151,11 @@ export default {
        * 提交评论
        */
     commitComment () {
+      if (this.needLoginIn()) {
+        return
+      }
       postComment(this.comment).then(() => {
-        this.$notification['success']({
-          message: '提示',
-          description: '评论成功',
-          duration: 8
-        })
+        this.$message.success('评论成功')
         this.comment.content = null
         this.$emit('refreshComment')
       })
@@ -147,6 +165,9 @@ export default {
        * 提交回复
        */
     commitReply () {
+      if (this.needLoginIn()) {
+        return
+      }
       const { content } = this.reply
       if (content) {
         this.reply.content = content.substring(content.indexOf('：') + 1, content.length)

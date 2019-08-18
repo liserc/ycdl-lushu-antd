@@ -1,6 +1,6 @@
 <template>
   <a-card :bordered="false" :body-style="{padding:'2px'}">
-    <el-carousel :interval="4000" height="340px" indicator-position="none">
+    <el-carousel ref="elCarousel" height="340px" :autoplay="false" indicator-position="none" @change="carouselChange">
       <el-carousel-item v-for="(item,key) in keypoints" :key="key">
         <a-row>
           <a-col :span="7">&nbsp;</a-col>
@@ -17,7 +17,7 @@
               <template slot="cover">
                 <img
                   v-if="item.type ===2"
-                  src="http://duanly.oss-cn-shenzhen.aliyuncs.com/lushu/route/10/images/20190626/b905ab1a5f5dff70a0a3173aae808f1d.jpg"
+                  :src="item.name"
                   alt="图片无法加载"
                   height="200"
                   :preview="2"
@@ -76,7 +76,8 @@ import Aplayer from 'vue-aplayer'
 // 引入音视频播放器
 import VideoPlayer from 'vue-video-player'
 import moment from 'moment'
-
+Vue.use(Carousel)
+Vue.use(CarouselItem)
 Vue.use(preview)
 
 require('video.js/dist/video-js.css')
@@ -86,8 +87,6 @@ Vue.use(VideoPlayer)
 export default {
   name: 'PointGallery',
   components: {
-    Carousel,
-    CarouselItem,
     Aplayer
   },
   props: {
@@ -107,6 +106,14 @@ export default {
   },
   data () {
     return {
+    }
+  },
+  methods: {
+    carouselChange (index) {
+      this.$emit('mapRelation', index)
+    },
+    carouselActiveItem (index) {
+      this.$refs.elCarousel.setActiveItem(index)
     }
   }
 }

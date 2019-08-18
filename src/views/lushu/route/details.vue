@@ -26,7 +26,7 @@
         </a-card>
       </a-col>
       <a-col :span="9">
-        <a-card :bordered="false" :body-style="{padding: '0px'}">
+        <a-card :bordered="false" :body-style="{padding: '2px'}">
           <div
             class="demo-infinite-container"
           >
@@ -83,10 +83,14 @@
                       }"
                       :playsinline="false"
                     />
-                    <h3 v-if="item.type ===5" slot="title">{{ item.name }}</h3>
                   </template>
-                  <a-card-meta
-                    description="散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影。调皮的阳光掀动了四月的心帘，温暖如约的歌声渐起。">
+                  <a-card-meta>
+                    <template slot="title">
+                      <span v-if="item.type ===5">{{ item.name }}</span>
+                    </template>
+                    <template slot="description">
+                      <span>散落在指尖的阳光，我试着轻轻抓住光影的踪迹，它却在眉宇间投下一片淡淡的阴影。调皮的阳光掀动了四月的心帘，温暖如约的歌声渐起。"</span>
+                    </template>
                   </a-card-meta>
                 </a-card>
                 <template slot="actions">
@@ -310,8 +314,8 @@ export default {
     loadKeyPoints (points) {
       this.all_index = points.length
       points.forEach((val, index) => {
-        var point = new BMap.Point(val.lat, val.lng)
-        var myIcon = new BMap.Icon(
+        const point = new BMap.Point(val.lat, val.lng)
+        const myIcon = new BMap.Icon(
           this.route_photo[val.type],
           new BMap.Size(48, 48),
           {
@@ -326,9 +330,7 @@ export default {
         this.markers[index].addEventListener('click', function () {
           that.markers[that.now_index].setAnimation(0)
           that.scrollToListItem(this.customData.index)
-          // console.log(this.customData.index)
           that.showPoint(this.customData.index)
-          // that.$refs.elCarousel.setActiveItem(this.customData.index)
         })
       })
     },

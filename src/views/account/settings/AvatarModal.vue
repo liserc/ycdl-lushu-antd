@@ -18,6 +18,7 @@
           </a-button>
         </a-upload>
       </a-col>
+      <br/>
       <a-col :xs="24" :md="12" :style="{height: '350px'}">
         <vue-cropper
           ref="cropper"
@@ -51,17 +52,10 @@
   </a-modal>
 </template>
 <script>
-// import { VueCropper } from 'vue-cropper'
-
 import ACol from 'ant-design-vue/es/grid/Col'
 import { uploadTheAvatar } from '@/api/user'
 export default {
   components: { ACol },
-  /*
-  components: {
-    VueCropper
-  },
-  */
   data () {
     return {
       visible: false,
@@ -85,7 +79,7 @@ export default {
     }
   },
   created () {
-    this.options.img = '/avatar2.jpg'
+    this.options.img = 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png'
   },
   methods: {
     edit (id) {
@@ -98,12 +92,10 @@ export default {
       this.visible = false
     },
     beforeUpload (file) {
-      // this.fileList = [file]
       const reader = new FileReader()
       reader.readAsDataURL(file) // 重要 以dataURL形式读取文件
       reader.onload = e => {
-        const data = e.target.result
-        this.options.img = data
+        this.options.img = e.target.result
       }
       return false
     },
@@ -114,30 +106,29 @@ export default {
       this.close()
     },
     okHandel () {
-      // setTimeout(() => {
-      //   vm.confirmLoading = false
-      //   vm.close()
-      //   vm.$message.success('上传头像成功')
-      // }, 2000)
-
       const formData = new FormData()
       const vm = this
       vm.confirmLoading = true
       this.$refs.cropper.getCropBlob(data => {
-        // data是裁剪后图片的blob对象
-        formData.append('file', data)
-        vm.confirmLoading = false
-        // this.options.img = ''
+        formData.set('file', data)
         uploadTheAvatar(this.id, formData).then(() => {
+          vm.uploadSuccess()
+        }).finally(() => {
           vm.confirmLoading = false
-          vm.close()
-          vm.$message.success('上传头像成功')
         })
       })
       return false
     },
     realTime (data) {
       this.previews = data
+    },
+    uploadSuccess () {
+      this.close()
+      this.$store.dispatch('GetUserDetails').then(() => {
+        this.$emit('refreshUserDetails')
+      }).finally(() => {
+        this.$message.success('上传头像成功')
+      })
     }
   }
 }

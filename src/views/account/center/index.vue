@@ -5,24 +5,24 @@
         <a-card :bordered="false">
           <div class="account-center-avatarHolder">
             <div class="avatar">
-              <img :src="userInfo.avatar">
+              <img :src="userdetails.avatar">
             </div>
-            <div class="username">{{ userInfo.nickName }}</div>
-            <div class="bio">海纳百川，有容乃大</div>
+            <div class="username">{{ userdetails.nickName }}</div>
+            <div class="bio">{{ userdetails.signature }}</div>
           </div>
           <div class="account-center-detail">
             <p>
-              <i class="address"></i>
-              <span>{{ userInfo.sex | filterSex }} </span>
+              <icon-font type="icon---tianxiebaobaoxinxidetubiao-"/>
+              <span>{{ userdetails.sex | filterSex }} </span>
             </p>
             <p>
-              <i class="address"></i>
-              <span>{{ userInfo.age }} 岁</span>
+              <icon-font type="icon-yonghunianling"/>
+              <span>{{ userdetails.age }} 岁</span>
             </p>
             <p>
-              <i class="address"></i>
-              <span>{{ userInfo.province }} </span>
-              <span>{{ userInfo.city }}</span>
+              <icon-font type="icon-dizhi"/>
+              <span>{{ userdetails.province }} </span>
+              <span>{{ userdetails.city }}</span>
             </p>
           </div>
           <a-divider/>
@@ -50,7 +50,7 @@
 <script>
 import { PageView, RouteView } from '@/layouts'
 import { AppPage, ArticlePage, ProjectPage, PointCollection, RouteCollection } from './page'
-
+import { IconFont } from '@/components/IconFont'
 import { mapGetters } from 'vuex'
 import { getCollection } from '@/api/lushu/common'
 import { getUserdetails } from '@/api/user'
@@ -62,6 +62,7 @@ export default {
     PageView,
     AppPage,
     ArticlePage,
+    IconFont,
     ProjectPage,
     PointCollection,
     RouteCollection
@@ -69,9 +70,10 @@ export default {
   data () {
     return {
       pathId: '',
-      userInfo: {
+      userdetails: {
         userId: '',
         nickName: '',
+        signature: null,
         avatar: '',
         sex: '',
         age: '',
@@ -116,7 +118,7 @@ export default {
     }
   },
   created () {
-    this.pathId = this.$route.query.id
+    this.pathId = this.$route.params.id
     console.log('路由传值：' + this.pathId)
     this.getUserInfo(this.pathId)
     this.getRouteSocial(this.pathId)
@@ -132,10 +134,10 @@ export default {
       if (userId) {
         getUserdetails(userId).then(res => {
           const { data } = res
-          this.userInfo = data
+          this.userdetails = data
         })
       } else {
-        this.userInfo = this.$store.getters.userInfo
+        this.userdetails = this.$store.getters.userdetails
       }
     },
     getRouteSocial (userId) {
@@ -227,7 +229,7 @@ export default {
       width: 14px;
       left: 0;
       top: 4px;
-      background: url(https://gw.alipayobjects.com/zos/rmsportal/pBjWzVAHnOOtAUvZmZfy.svg);
+      /*background: url(https://gw.alipayobjects.com/zos/rmsportal/pBjWzVAHnOOtAUvZmZfy.svg);*/
     }
 
     .title {

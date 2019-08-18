@@ -1,6 +1,3 @@
-// import TextIconOverlay from '@/assets/js/api/TextIconOverlay_min.js'
-// import MarkerClusterer from '@/assets/js/api/MarkerClusterer_min.js'
-
 /**
  * @description 加载百度地图相关资源js
  * @param {string} ak
@@ -12,8 +9,11 @@ function loadBMap (ak) {
       .then(() => {
         // 调用加载第三方组件js公共方法加载其他资源库
         // 加载聚合API
-        /// MarkerClusterer_min.js依赖TextIconOverlay.js。因此先加载TextIconOverlay.js
-        // 'http://api.map.baidu.com/library/TextIconOverlay/1.2/src/TextIconOverlay_min.js
+        // MarkerClusterer_min.js依赖TextIconOverlay.js。因此先加载TextIconOverlay.js
+        // 'http://api.map.baidu.com/library/TextIconOverlay/1.2/src/TextIconOverlay_min.js'
+        // '/resource/api/TextIconOverlay_min.js'
+        // 'http://api.map.baidu.com/library/MarkerClusterer/1.2/src/MarkerClusterer_min.js'
+        // '/resource/api/MarkerClusterer_min.js'
         asyncLoadJs('http://api.map.baidu.com/library/TextIconOverlay/1.2/src/TextIconOverlay_min.js')
         // asyncLoadJs(TextIconOverlay)
           .then(() => {
